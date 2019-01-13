@@ -3,7 +3,6 @@ package com.example.android.stockgame;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.CursorIndexOutOfBoundsException;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.StrictMode;
@@ -33,9 +32,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.List;
-
-import android.support.design.widget.FloatingActionButton;
 
 
 public class Inventory extends AppCompatActivity {
@@ -57,6 +53,26 @@ public class Inventory extends AppCompatActivity {
             addStock("Money", "---", "---", "---", 10000);
         }
 
+        FloatingActionButton fab1 = findViewById(R.id.fab1);
+        fab1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Intent intent=new Intent(view.getContext(),Link1.class);
+                //view.getContext().startActivity(intent);
+                setContentView(R.layout.buy);
+            }
+        });
+
+        FloatingActionButton fab2 = findViewById(R.id.fab2);
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Intent intent=new Intent(view.getContext(),Link2.class);
+                //view.getContext().startActivity(intent);
+                setContentView(R.layout.sell);
+            }
+        });
+
     }
 
     @Override
@@ -70,7 +86,7 @@ public class Inventory extends AppCompatActivity {
 
     public void inventoryToAdd(View view) {
         //Toast.makeText(this,"Test",Toast.LENGTH_SHORT).show();
-        setContentView(R.layout.activity_stocksearch);
+        setContentView(R.layout.buy);
     }
 
     /*public void inventoryAddExample(View view) {
@@ -303,14 +319,44 @@ public class Inventory extends AppCompatActivity {
 
                 // Read the Stock data out
                 String stockPrice = Double.toString(searchedStock.getValue());
+                //Toast.makeText(this, String.valueOf(symbolColumnIndex), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, symb, Toast.LENGTH_SHORT).show();
                 //Toast.makeText(this, stockPrice, Toast.LENGTH_SHORT).show();
 
-                // Update the database entry
-                modifyEntry(String.valueOf( symbolColumnIndex ),"price",stockPrice);
+                //Getting the correct Index for the entry to be updated:
+                long id = getIdFromSymbol(symb);
+                String ID = String.valueOf(id);
+
+                // Calculate the resulting total value:
+                long amount = getStockAmount(ID);
+                //Toast.makeText(this,String.valueOf(amount),Toast.LENGTH_SHORT).show();
+                double total = amount * searchedStock.getValue();
+                String Total = String.valueOf(total);
+                //Toast.makeText(this,String.valueOf(total),Toast.LENGTH_SHORT).show();
+
+                // Update the database entries
+                //modifyEntry(String.valueOf( symbolColumnIndex ),"price",stockPrice);
+                modifyEntry(ID,"price",stockPrice);
+                modifyEntry(ID,"totalvalue",Total);
 
             }
         }
         cursor.close();
+
+        // Check for the updated info <--> Debugging of the update procedure
+        //int checkPos = getIdFromSymbol("GOOG");
+        //String CheckPos = Integer.toString(checkPos);
+        //Toast.makeText(this,CheckPos,Toast.LENGTH_LONG).show();
+
+        //String CheckName = getEntryInformation(CheckPos,"name");
+        //Toast.makeText(this,CheckName,Toast.LENGTH_LONG).show();
+
+        //String CheckPrice = getEntryInformation(CheckPos,"price");
+        //Toast.makeText(this,CheckPrice,Toast.LENGTH_LONG).show();
+
+        //Toast.makeText(this,CheckName + ": " + CheckPrice,Toast.LENGTH_LONG).show();
+
+
 
         displayDatabaseInfo();
 
@@ -430,7 +476,9 @@ public class Inventory extends AppCompatActivity {
         values.put(StockEntry.COLUMN_STOCK_PRICE, price);
         values.put(StockEntry.COLUMN_STOCK_TOTALVALUE, total);
 
-        db.update("stocks", values, "_ID=?",new String[]{ position });
+        //db.update("stocks", values, "_ID=?",new String[]{ position });
+        db.update("stocks", values, "_ID="+position,null);
+
     }
 
     // Return all information to a certain stock from the database
@@ -584,10 +632,11 @@ public class Inventory extends AppCompatActivity {
                 return id;
             }
             else {
+                Toast.makeText(this,"Stopped here",Toast.LENGTH_LONG).show();
                 return -1;
             }
         } catch (Exception e) {
-
+            Toast.makeText(this,"Didn't work",Toast.LENGTH_LONG).show();
             return -1;
         }
 
@@ -663,7 +712,7 @@ public class Inventory extends AppCompatActivity {
             result_area.setVisibility(View.VISIBLE);
         }
         else{ // Stock does not exist
-            setContentView(R.layout.activity_stocksearch);
+            setContentView(R.layout.buy);
         }
     }
 
@@ -825,8 +874,10 @@ public class Inventory extends AppCompatActivity {
     }
 
     public void SearchInventoryButton(View view) {
-        setContentView(R.layout.activity_inventory);
-        displayDatabaseInfo();
+        Intent intent=new Intent(view.getContext(),Inventory.class);
+        view.getContext().startActivity(intent);
+        //setContentView(R.layout.activity_inventory);
+        //displayDatabaseInfo();
     }
 
 
