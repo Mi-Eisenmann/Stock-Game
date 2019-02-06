@@ -1,4 +1,4 @@
-package com.example.android.stockgame;
+package com.example.android.stockgame.Stock_Object;
 
 public class Stock {
 
